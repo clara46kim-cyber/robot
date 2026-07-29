@@ -1,377 +1,322 @@
-import { useMemo, useState } from "react";
-import { questions } from "./questions";
+import { useMemo, useState } from 'react'
+import { ArrowLeft, CheckCircle2, Home, RotateCcw, Sparkles, XCircle } from 'lucide-react'
+import { questions } from './questions'
 
-function Robot({ mood = "happy" }) {
-  return (
-    <div className={`robot robot-${mood}`} aria-label="귀여운 로봇 캐릭터">
-      <div className="antenna">
-        <span />
-      </div>
-      <div className="robot-head">
-        <div className="robot-ear left" />
-        <div className="robot-ear right" />
-        <div className="robot-face">
-          <i className="eye left" />
-          <i className="eye right" />
-          <div className="mouth" />
-        </div>
-      </div>
-      <div className="robot-body">
-        <div className="heart">★</div>
-      </div>
-      <div className="robot-arm left" />
-      <div className="robot-arm right" />
-    </div>
-  );
+const partPositions = {
+  1: { left: '50%', top: '20%' },
+  2: { left: '83%', top: '48%' },
+  3: { left: '17%', top: '48%' },
+  4: { left: '50%', top: '48%' },
+  5: { left: '50%', top: '29%' },
+  6: { left: '66%', top: '88%' },
+  7: { left: '34%', top: '88%' },
+  8: { left: '50%', top: '5%' }
 }
 
-function StartScreen({ onStart }) {
+function RobotMap({ completed, onSelect }) {
   return (
-    <main className="page center-page">
-      <div className="floating gear g1">⚙️</div>
-      <div className="floating gear g2">⚙️</div>
-      <Robot />
-      <section className="hero-card">
-        <span className="eyebrow">부천 로보파크 온라인 활동지</span>
-        <h1>로봇 박사 탐험대</h1>
-        <p>
-          로봇 친구와 함께 6개의 미션을 해결하고
-          <br />
-          나만의 로봇 박사 인증서를 받아 보세요!
-        </p>
-        <button className="primary big" onClick={onStart}>
-          🚀 탐험 시작
-        </button>
-      </section>
-    </main>
-  );
-}
+    <div className="robot-stage">
+      <div className="stars" aria-hidden="true">✦　·　✧　·　✦</div>
 
-function Progress({ current, total, completed }) {
-  const percent = Math.round((completed / total) * 100);
-  return (
-    <div className="progress-wrap">
-      <div className="progress-label">
-        <span>미션 {current} / {total}</span>
-        <strong>{percent}% 완료</strong>
-      </div>
-      <div className="progress-track">
-        <div className="progress-bar" style={{ width: `${percent}%` }} />
-      </div>
-    </div>
-  );
-}
+      <svg className="robot-svg" viewBox="0 0 500 650" role="img" aria-label="문제 번호가 표시된 귀여운 로봇">
+        <defs>
+          <linearGradient id="bodyGradient" x1="0" x2="1">
+            <stop offset="0%" stopColor="#8e86ff" />
+            <stop offset="100%" stopColor="#5f58e8" />
+          </linearGradient>
+          <linearGradient id="screenGradient" x1="0" x2="0" y1="0" y2="1">
+            <stop offset="0%" stopColor="#eaffff" />
+            <stop offset="100%" stopColor="#b9f0f0" />
+          </linearGradient>
+          <filter id="shadow">
+            <feDropShadow dx="0" dy="10" stdDeviation="12" floodOpacity=".18" />
+          </filter>
+        </defs>
 
-function ChoiceQuestion({ q, value, onChange }) {
-  return (
-    <div className="option-grid">
-      {q.options.map((option, index) => (
-        <button
-          key={option}
-          type="button"
-          className={`option ${value === index ? "selected" : ""}`}
-          onClick={() => onChange(index)}
-        >
-          <span className="option-number">{index + 1}</span>
-          {option}
-        </button>
-      ))}
-    </div>
-  );
-}
+        <g filter="url(#shadow)">
+          <line x1="250" y1="75" x2="250" y2="35" stroke="#5149cc" strokeWidth="10" strokeLinecap="round" />
+          <circle cx="250" cy="25" r="16" fill="#ffcf5c" />
 
-function MultiQuestion({ q, value = [], onChange }) {
-  const toggle = (index) => {
-    const next = value.includes(index)
-      ? value.filter((item) => item !== index)
-      : [...value, index];
-    onChange(next);
-  };
-  return (
-    <div className="option-grid">
-      {q.options.map((option, index) => (
-        <button
-          key={option}
-          type="button"
-          className={`option ${value.includes(index) ? "selected" : ""}`}
-          onClick={() => toggle(index)}
-        >
-          <span className="checkbox">{value.includes(index) ? "✓" : ""}</span>
-          {option}
-        </button>
-      ))}
-    </div>
-  );
-}
+          <rect x="140" y="85" width="220" height="165" rx="70" fill="url(#bodyGradient)" />
+          <rect x="165" y="113" width="170" height="105" rx="44" fill="url(#screenGradient)" />
+          <circle cx="215" cy="163" r="15" fill="#3d3a78" />
+          <circle cx="285" cy="163" r="15" fill="#3d3a78" />
+          <circle cx="210" cy="157" r="5" fill="white" />
+          <circle cx="280" cy="157" r="5" fill="white" />
+          <path d="M220 193 Q250 215 280 193" fill="none" stroke="#3d3a78" strokeWidth="8" strokeLinecap="round" />
 
-function MatchingQuestion({ q, value = {}, onChange }) {
-  return (
-    <div className="matching-list">
-      {q.pairs.map((pair, index) => (
-        <label className="matching-row" key={pair.left}>
-          <strong>{pair.left}</strong>
-          <span>→</span>
-          <select
-            value={value[index] || ""}
-            onChange={(e) => onChange({ ...value, [index]: e.target.value })}
-          >
-            <option value="">선택하기</option>
-            {q.choices.map((choice) => (
-              <option key={choice} value={choice}>{choice}</option>
-            ))}
-          </select>
-        </label>
-      ))}
-    </div>
-  );
-}
+          <rect x="135" y="270" width="230" height="205" rx="55" fill="url(#bodyGradient)" />
+          <rect x="180" y="310" width="140" height="100" rx="24" fill="#f7f6ff" />
+          <circle cx="250" cy="350" r="24" fill="#ffcf5c" />
+          <path d="M238 350 l10 11 23-28" fill="none" stroke="#5149cc" strokeWidth="8" strokeLinecap="round" strokeLinejoin="round" />
 
-function QuestionBody({ q, value, onChange }) {
-  if (q.type === "choice") {
-    return <ChoiceQuestion q={q} value={value} onChange={onChange} />;
-  }
-  if (q.type === "multi") {
-    return <MultiQuestion q={q} value={value} onChange={onChange} />;
-  }
-  if (q.type === "matching") {
-    return <MatchingQuestion q={q} value={value} onChange={onChange} />;
-  }
-  if (q.type === "ox") {
-    return (
-      <div className="ox-grid">
-        {["O", "X"].map((item) => (
+          <rect x="70" y="285" width="70" height="190" rx="35" fill="#776ff3" transform="rotate(12 105 380)" />
+          <rect x="360" y="285" width="70" height="190" rx="35" fill="#776ff3" transform="rotate(-12 395 380)" />
+          <circle cx="77" cy="470" r="45" fill="#ffcf5c" />
+          <circle cx="423" cy="470" r="45" fill="#ffcf5c" />
+
+          <rect x="170" y="460" width="65" height="130" rx="30" fill="#6c63eb" />
+          <rect x="265" y="460" width="65" height="130" rx="30" fill="#6c63eb" />
+          <rect x="145" y="555" width="105" height="52" rx="26" fill="#3f397f" />
+          <rect x="250" y="555" width="105" height="52" rx="26" fill="#3f397f" />
+        </g>
+      </svg>
+
+      {questions.map((q) => {
+        const pos = partPositions[q.id]
+        return (
           <button
-            key={item}
-            type="button"
-            className={`ox-button ${value === item ? "selected" : ""}`}
-            onClick={() => onChange(item)}
+            key={q.id}
+            className={`hotspot ${completed[q.id] ? 'done' : ''}`}
+            style={{ left: pos.left, top: pos.top }}
+            onClick={() => onSelect(q.id)}
+            aria-label={`${q.part}의 ${q.id}번 문제 열기`}
           >
-            {item}
+            {completed[q.id] ? '✓' : q.id}
+            <span>{q.part}</span>
+          </button>
+        )
+      })}
+    </div>
+  )
+}
+
+function ChoiceQuestion({ question, savedAnswer, onSubmit }) {
+  const [selected, setSelected] = useState(savedAnswer?.value ?? null)
+
+  return (
+    <>
+      <div className="option-list">
+        {question.options.map((option, index) => (
+          <button
+            key={option}
+            className={`option ${selected === index ? 'selected' : ''}`}
+            onClick={() => setSelected(index)}
+            disabled={Boolean(savedAnswer)}
+          >
+            <span className="option-number">{index + 1}</span>
+            {option}
           </button>
         ))}
       </div>
-    );
-  }
-  return (
-    <textarea
-      className="idea-input"
-      value={value || ""}
-      placeholder={q.placeholder}
-      onChange={(e) => onChange(e.target.value)}
-      maxLength={180}
-    />
-  );
+      {!savedAnswer && (
+        <button className="submit-button" disabled={selected === null} onClick={() => onSubmit(selected)}>
+          정답 확인
+        </button>
+      )}
+    </>
+  )
 }
 
-function isAnswered(q, value) {
-  if (q.type === "multi") return Array.isArray(value) && value.length > 0;
-  if (q.type === "matching") {
-    return q.pairs.every((_, index) => Boolean(value?.[index]));
+function OxSetQuestion({ question, savedAnswer, onSubmit }) {
+  const [answers, setAnswers] = useState(savedAnswer?.value ?? Array(question.statements.length).fill(null))
+
+  const choose = (index, value) => {
+    if (savedAnswer) return
+    setAnswers((prev) => prev.map((item, i) => (i === index ? value : item)))
   }
-  return value !== undefined && value !== null && String(value).trim() !== "";
-}
 
-function isCorrect(q, value) {
-  if (q.type === "text") return String(value || "").trim().length >= 2;
-  if (q.type === "choice") return value === q.answer;
-  if (q.type === "ox") return value === q.answer;
-  if (q.type === "multi") {
-    const selected = [...(value || [])].sort();
-    return JSON.stringify(selected) === JSON.stringify([...q.answers].sort());
-  }
-  if (q.type === "matching") {
-    return q.pairs.every((pair, index) => value?.[index] === pair.answer);
-  }
-  return false;
-}
-
-function Quiz({ onFinish }) {
-  const [current, setCurrent] = useState(0);
-  const [answers, setAnswers] = useState({});
-  const [checked, setChecked] = useState({});
-  const q = questions[current];
-  const value = answers[q.id];
-  const result = checked[q.id];
-  const completed = Object.keys(checked).length;
-
-  const change = (next) => {
-    setAnswers((prev) => ({ ...prev, [q.id]: next }));
-    setChecked((prev) => {
-      const copy = { ...prev };
-      delete copy[q.id];
-      return copy;
-    });
-  };
-
-  const check = () => {
-    if (!isAnswered(q, value)) {
-      alert("먼저 답을 선택하거나 입력해 주세요!");
-      return;
-    }
-    setChecked((prev) => ({ ...prev, [q.id]: isCorrect(q, value) }));
-  };
-
-  const next = () => {
-    if (current === questions.length - 1) {
-      const score = questions.reduce(
-        (sum, item) => sum + (isCorrect(item, answers[item.id]) ? 1 : 0),
-        0
-      );
-      onFinish({ score, answers });
-    } else {
-      setCurrent((index) => index + 1);
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    }
-  };
+  const ready = answers.every((answer) => answer !== null)
 
   return (
-    <main className="page quiz-page">
-      <header className="mini-header">
-        <div className="mini-brand">🤖 로봇 박사 탐험대</div>
-        <span className="star-count">⭐ {completed}</span>
+    <>
+      <div className="ox-list">
+        {question.statements.map((item, index) => (
+          <div className="ox-card" key={item.text}>
+            <strong>{index + 1}. {item.text}</strong>
+            <div className="ox-buttons">
+              <button
+                className={answers[index] === true ? 'selected' : ''}
+                onClick={() => choose(index, true)}
+                disabled={Boolean(savedAnswer)}
+              >
+                O
+              </button>
+              <button
+                className={answers[index] === false ? 'selected' : ''}
+                onClick={() => choose(index, false)}
+                disabled={Boolean(savedAnswer)}
+              >
+                X
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
+      {!savedAnswer && (
+        <button className="submit-button" disabled={!ready} onClick={() => onSubmit(answers)}>
+          정답 확인
+        </button>
+      )}
+    </>
+  )
+}
+
+function QuestionScreen({ question, answer, onSubmit, onBack, onHome, onNext }) {
+  return (
+    <main className="question-page">
+      <header className="question-header">
+        <button className="icon-button" onClick={onBack} aria-label="뒤로 가기"><ArrowLeft /></button>
+        <div>
+          <span className="mission-label">MISSION {question.id}</span>
+          <h1>{question.part} 탐험</h1>
+        </div>
+        <button className="icon-button" onClick={onHome} aria-label="처음 화면"><Home /></button>
       </header>
 
-      <Progress
-        current={current + 1}
-        total={questions.length}
-        completed={completed}
-      />
-
       <section className="question-card">
-        <div className="mission-badge">MISSION {q.id}</div>
-        <div className="question-icon">{q.emoji}</div>
-        <h2>{q.title}</h2>
-        <p className="prompt">{q.prompt}</p>
+        <div className="mini-robot">🤖</div>
+        <h2>{question.title}</h2>
 
-        <QuestionBody q={q} value={value} onChange={change} />
-
-        {result !== undefined && (
-          <div className={`feedback ${result ? "correct" : "wrong"}`}>
-            <div className="feedback-title">
-              {result ? "🎉 정답이에요!" : "🔧 다시 생각해 볼까요?"}
-            </div>
-            <p>{q.explanation}</p>
-          </div>
+        {question.type === 'choice' ? (
+          <ChoiceQuestion question={question} savedAnswer={answer} onSubmit={onSubmit} />
+        ) : (
+          <OxSetQuestion question={question} savedAnswer={answer} onSubmit={onSubmit} />
         )}
 
-        <div className="action-row">
-          <button
-            className="secondary"
-            disabled={current === 0}
-            onClick={() => setCurrent((index) => index - 1)}
-          >
-            ← 이전
-          </button>
+        {answer && (
+          <div className={`feedback ${answer.correct ? 'correct' : 'incorrect'}`}>
+            <div className="feedback-title">
+              {answer.correct ? <CheckCircle2 /> : <XCircle />}
+              <strong>{answer.correct ? '정답이에요!' : '아쉬워요. 정답을 확인해 보세요!'}</strong>
+            </div>
 
-          {result === undefined ? (
-            <button className="primary" onClick={check}>
-              정답 확인
+            {!answer.correct && question.type === 'choice' && (
+              <p><b>정답:</b> {question.answer + 1}번. {question.options[question.answer]}</p>
+            )}
+
+            {!answer.correct && question.type === 'oxset' && (
+              <p>
+                <b>정답:</b>{' '}
+                {question.statements.map((item, index) => `${index + 1}번 ${item.answer ? 'O' : 'X'}`).join(', ')}
+              </p>
+            )}
+
+            <p className="explanation"><b>설명:</b> {question.explanation}</p>
+
+            <button className="next-button" onClick={onNext}>
+              {question.id === questions.length ? '결과 보기' : '다음 문제로'}
             </button>
-          ) : (
-            <button className="primary" onClick={next}>
-              {current === questions.length - 1 ? "탐험 완료 🏆" : "다음 미션 →"}
-            </button>
-          )}
-        </div>
+          </div>
+        )}
       </section>
-
-      <aside className="robot-tip">
-        <Robot mood={result === false ? "thinking" : "happy"} />
-        <div className="speech">
-          {result === undefined
-            ? "천천히 관찰하고 답을 골라 봐!"
-            : result
-              ? "삐빅! 아주 훌륭해!"
-              : "괜찮아. 설명을 읽고 다시 골라 봐!"}
-        </div>
-      </aside>
     </main>
-  );
+  )
 }
 
-function Certificate({ score, onRestart }) {
-  const [name, setName] = useState("");
-  const date = useMemo(
-    () => new Intl.DateTimeFormat("ko-KR", { dateStyle: "long" }).format(new Date()),
-    []
-  );
-
-  const print = () => window.print();
-
+function ResultScreen({ answers, onHome, onReset }) {
+  const score = Object.values(answers).filter((item) => item.correct).length
   return (
-    <main className="page certificate-page">
-      <div className="confetti">★　⚙️　★　🤖　★　⚙️　★</div>
-      <section className="result-card">
-        <Robot />
-        <h1>모든 미션 완료!</h1>
-        <p className="score">
-          총 <strong>{questions.length}</strong>개 중{" "}
-          <strong>{score}</strong>개 미션 성공
+    <main className="result-page">
+      <div className="result-card">
+        <div className="confetti">✦ 🎉 ✦</div>
+        <div className="result-robot">🤖</div>
+        <h1>로봇 탐험 완료!</h1>
+        <p className="score"><strong>{score}</strong> / {questions.length}</p>
+        <p>
+          {score === questions.length
+            ? '대단해요! 로봇 박사로 임명합니다!'
+            : '틀린 문제도 설명을 읽으면 로봇 지식이 쑥쑥 자라요!'}
         </p>
-        <label className="name-label">
-          인증서에 들어갈 이름
-          <input
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            placeholder="이름을 입력하세요"
-            maxLength={12}
-          />
-        </label>
-      </section>
-
-      <section className="certificate" id="certificate">
-        <div className="certificate-border">
-          <span className="certificate-badge">🤖</span>
-          <p className="small-title">ROBOT EXPLORER CERTIFICATE</p>
-          <h2>로봇 박사 인증서</h2>
-          <p className="certificate-name">{name || "멋진 탐험가"} 어린이</p>
-          <p className="certificate-text">
-            위 어린이는 로봇의 원리와 역할을 알아보는
-            <br />
-            모든 탐험 미션에 즐겁게 참여하였으므로
-            <br />
-            이 인증서를 수여합니다.
-          </p>
-          <p className="certificate-date">{date}</p>
-          <p className="signature">로봇 박사 탐험대장 🤖</p>
+        <div className="result-actions">
+          <button className="secondary-button" onClick={onHome}><Home /> 로봇으로 돌아가기</button>
+          <button className="submit-button" onClick={onReset}><RotateCcw /> 처음부터 다시 하기</button>
         </div>
-      </section>
-
-      <div className="result-actions">
-        <button className="secondary" onClick={onRestart}>처음부터 다시</button>
-        <button className="primary" onClick={print}>인증서 인쇄·저장</button>
       </div>
     </main>
-  );
+  )
 }
 
 export default function App() {
-  const [screen, setScreen] = useState("start");
-  const [result, setResult] = useState(null);
+  const [screen, setScreen] = useState('home')
+  const [currentId, setCurrentId] = useState(null)
+  const [answers, setAnswers] = useState({})
 
-  if (screen === "start") {
-    return <StartScreen onStart={() => setScreen("quiz")} />;
+  const currentQuestion = useMemo(
+    () => questions.find((question) => question.id === currentId),
+    [currentId]
+  )
+
+  const openQuestion = (id) => {
+    setCurrentId(id)
+    setScreen('question')
+    window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
-  if (screen === "quiz") {
+  const submitAnswer = (value) => {
+    let correct = false
+    if (currentQuestion.type === 'choice') {
+      correct = value === currentQuestion.answer
+    } else {
+      correct = value.every((item, index) => item === currentQuestion.statements[index].answer)
+    }
+    setAnswers((prev) => ({
+      ...prev,
+      [currentQuestion.id]: { value, correct }
+    }))
+  }
+
+  const goNext = () => {
+    if (currentId === questions.length) {
+      setScreen('result')
+      return
+    }
+    openQuestion(currentId + 1)
+  }
+
+  const reset = () => {
+    setAnswers({})
+    setCurrentId(null)
+    setScreen('home')
+  }
+
+  if (screen === 'question' && currentQuestion) {
     return (
-      <Quiz
-        onFinish={(quizResult) => {
-          setResult(quizResult);
-          setScreen("certificate");
-          window.scrollTo({ top: 0, behavior: "smooth" });
-        }}
+      <QuestionScreen
+        question={currentQuestion}
+        answer={answers[currentQuestion.id]}
+        onSubmit={submitAnswer}
+        onBack={() => setScreen('home')}
+        onHome={() => setScreen('home')}
+        onNext={goNext}
       />
-    );
+    )
   }
+
+  if (screen === 'result') {
+    return <ResultScreen answers={answers} onHome={() => setScreen('home')} onReset={reset} />
+  }
+
+  const completedCount = Object.keys(answers).length
 
   return (
-    <Certificate
-      score={result?.score || 0}
-      onRestart={() => {
-        setResult(null);
-        setScreen("start");
-      }}
-    />
-  );
+    <main className="home-page">
+      <section className="hero">
+        <div className="badge"><Sparkles size={16} /> 부천 로보파크 탐험 활동지</div>
+        <h1>로봇의 몸을 눌러<br />미션을 해결해요!</h1>
+        <p>번호가 적힌 로봇 부위를 눌러 문제를 풀어 보세요.</p>
+        <div className="progress-wrap">
+          <div className="progress-info"><span>탐험 진행도</span><b>{completedCount}/{questions.length}</b></div>
+          <div className="progress-bar"><div style={{ width: `${(completedCount / questions.length) * 100}%` }} /></div>
+        </div>
+      </section>
+
+      <RobotMap completed={answers} onSelect={openQuestion} />
+
+      <section className="mission-guide">
+        <h2>미션 목록</h2>
+        <div className="mission-grid">
+          {questions.map((question) => (
+            <button key={question.id} onClick={() => openQuestion(question.id)} className={answers[question.id] ? 'complete' : ''}>
+              <span>{answers[question.id] ? '✓' : question.id}</span>
+              <div><b>{question.part}</b><small>문제 열기</small></div>
+            </button>
+          ))}
+        </div>
+        {completedCount === questions.length && (
+          <button className="submit-button result-open" onClick={() => setScreen('result')}>최종 결과 보기</button>
+        )}
+      </section>
+    </main>
+  )
 }

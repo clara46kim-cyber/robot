@@ -1,5 +1,5 @@
 {
-  "name": "robot-workbook-react",
+  "name": "robot-body-quiz",
   "private": true,
   "version": "1.0.0",
   "type": "module",
@@ -9,11 +9,11 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1"
+    "@vitejs/plugin-react": "^4.4.1",
+    "vite": "^6.1.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "lucide-react": "^0.468.0"
   },
-  "devDependencies": {
-    "@vitejs/plugin-react": "^4.3.4",
-    "vite": "^6.0.5"
-  }
+  "devDependencies": {}
 }

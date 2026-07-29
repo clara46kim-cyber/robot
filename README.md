@@ -1,32 +1,23 @@
-# 로봇 박사 탐험대
-
-초등학생이 휴대폰이나 태블릿으로 직접 풀 수 있는 React 기반 온라인 활동지입니다.
-
-## 포함 기능
-
-- 객관식, 복수 선택, OX, 연결하기, 서술형
-- 문제별 자동 채점과 상세 설명
-- 진행률과 미션 별 표시
-- 귀여운 로봇 테마
-- 마지막 로봇 박사 인증서
-- 인증서 인쇄 또는 PDF 저장
-- 모바일 화면 최적화
+# 로봇의 몸을 눌러 푸는 온라인 활동지
 
 ## 실행 방법
-
-1. ZIP 압축을 풉니다.
-2. 폴더 안의 모든 파일을 GitHub 저장소에 업로드합니다.
-3. Vercel에서 해당 GitHub 저장소를 연결합니다.
-4. Framework Preset은 Vite가 자동 선택됩니다.
-5. Deploy를 누릅니다.
-
-컴퓨터에서 확인하려면:
 
 ```bash
 npm install
 npm run dev
 ```
 
+## Vercel 배포 설정
+
+- Framework Preset: Vite
+- Build Command: `npm run build`
+- Output Directory: `dist`
+- Install Command: `npm install`
+- Root Directory: 비워두기
+
 ## 문제 수정
 
-`src/questions.js`에서 문제, 보기, 정답, 설명을 수정할 수 있습니다.
+`src/questions.js` 파일에서 문제, 보기, 정답, 설명을 수정하면 됩니다.
+
+- 객관식 정답은 보기의 순서대로 0, 1, 2, 3으로 입력합니다.
+- OX 묶음 문제는 `true`가 O, `false`가 X입니다.
