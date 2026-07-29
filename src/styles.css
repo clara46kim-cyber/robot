@@ -211,3 +211,97 @@ button:focus-visible, input:focus-visible, textarea:focus-visible { outline: 4px
   .ox-buttons button { height: 120px; font-size: 60px; }
   .certificate { padding: 30px 16px; }
 }
+
+
+/* v5 exact first-screen layout */
+.exact-list {
+  max-width: 920px;
+  margin: 36px auto 0;
+  display: grid;
+  gap: 16px;
+}
+.exact-card {
+  position: relative;
+  min-height: 190px;
+  width: 100%;
+  display: grid;
+  grid-template-columns: 70px 190px 1fr;
+  align-items: center;
+  gap: 18px;
+  padding: 16px 28px 16px 10px;
+  overflow: hidden;
+  border: 1px solid #e3e8df;
+  border-left: 10px solid var(--accent);
+  border-radius: 24px;
+  background: white;
+  text-align: left;
+  box-shadow: 0 12px 34px rgba(42,70,32,.09);
+  transition: transform .18s ease, box-shadow .18s ease;
+}
+.exact-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 18px 42px rgba(42,70,32,.14);
+}
+.number-badge {
+  width: 48px;
+  height: 48px;
+  margin-left: 10px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--accent);
+  color: white;
+  font-size: 22px;
+  font-weight: 900;
+}
+.exact-card img {
+  width: 180px;
+  height: 165px;
+  object-fit: contain;
+  mix-blend-mode: multiply;
+}
+.exact-copy small {
+  display: block;
+  color: var(--accent);
+  font-size: 18px;
+  font-weight: 900;
+}
+.exact-copy h2 {
+  margin: 8px 0 17px;
+  font-family: 'Jua';
+  font-size: clamp(27px, 4vw, 39px);
+  color: #2c2c2c;
+}
+.exact-copy span {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--accent);
+  font-weight: 900;
+}
+@media (max-width: 620px) {
+  .exact-card {
+    min-height: 155px;
+    grid-template-columns: 45px 105px 1fr;
+    gap: 8px;
+    padding: 12px 12px 12px 6px;
+    border-left-width: 7px;
+  }
+  .number-badge {
+    width: 36px;
+    height: 36px;
+    margin-left: 4px;
+    font-size: 17px;
+  }
+  .exact-card img {
+    width: 100px;
+    height: 130px;
+  }
+  .exact-copy small { font-size: 13px; }
+  .exact-copy h2 {
+    margin: 5px 0 10px;
+    font-size: 22px;
+    line-height: 1.25;
+  }
+  .exact-copy span { font-size: 13px; }
+}
