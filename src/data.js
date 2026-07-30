@@ -6,7 +6,8 @@ export const parts = [
     image: "tpa",
     color: "#2366a5",
     menuTitle: "로봇이란? · 로봇의 구성",
-    intro: "안녕! 나는 티파야. 로봇이 무엇인지, 로봇을 이루는 센서·컴퓨터·모터를 함께 알아보자!",
+    intro:
+      "안녕! 나는 티파야. 로봇이 무엇인지, 로봇을 이루는 센서·컴퓨터·모터를 함께 알아보자!",
     type: "quiz",
     questions: [
       {
@@ -24,14 +25,16 @@ export const parts = [
       },
       {
         kind: "choice",
-        question: "사람의 눈처럼 로봇이 주변을 알아보게 하는 장치는 무엇일까요?",
+        question:
+          "사람의 눈처럼 로봇이 주변을 알아보게 하는 장치는 무엇일까요?",
         options: ["센서", "모터", "배터리", "바퀴"],
         answer: 0,
         explanation: "센서는 빛, 소리, 거리 등을 감지합니다."
       },
       {
         kind: "choice",
-        question: "사람의 뇌처럼 정보를 처리하고 명령을 내리는 부분은 무엇일까요?",
+        question:
+          "사람의 뇌처럼 정보를 처리하고 명령을 내리는 부분은 무엇일까요?",
         options: ["카메라", "컴퓨터와 제어장치", "바퀴", "관절"],
         answer: 1,
         explanation:
@@ -39,7 +42,8 @@ export const parts = [
       },
       {
         kind: "choice",
-        question: "사람의 근육처럼 로봇의 몸을 움직이게 하는 장치는 무엇일까요?",
+        question:
+          "사람의 근육처럼 로봇의 몸을 움직이게 하는 장치는 무엇일까요?",
         options: ["센서", "모터", "마이크", "화면"],
         answer: 1,
         explanation: "모터는 로봇의 팔, 다리, 바퀴 등을 움직입니다."
@@ -54,12 +58,13 @@ export const parts = [
     image: "tma",
     color: "#ed1c24",
     menuTitle: "로봇의 역사",
-    intro: "안녕! 나는 티마야. 로봇의 역사를 함께 알아보자!",
+    intro: "안녕! 나는 티마야. 로봇의 역사를 사진과 함께 알아보자!",
     type: "quiz",
     questions: [
       {
         kind: "choice",
-        question: "‘로봇(Robot)’이라는 말을 처음 사용한 사람은 누구일까요?",
+        question:
+          "‘로봇(Robot)’이라는 말을 처음 사용한 사람은 누구일까요?",
         options: [
           "카렐 차페크",
           "아이작 뉴턴",
@@ -68,7 +73,11 @@ export const parts = [
         ],
         answer: 0,
         explanation:
-          "카렐 차페크가 희곡 「R.U.R.」에서 Robot이라는 말을 처음 사용했습니다."
+          "체코의 작가 카렐 차페크가 희곡 「R.U.R.」에서 Robot이라는 말을 처음 사용했습니다.",
+        image: "capek",
+        imageAlt: "카렐 차페크 사진",
+        imageCaption:
+          "로봇이라는 말을 처음 사용한 체코의 작가 카렐 차페크"
       },
       {
         kind: "choice",
@@ -82,33 +91,36 @@ export const parts = [
         ],
         answer: 1,
         explanation:
-          "레오나르도 다빈치는 움직이는 기계 기사를 설계했습니다."
+          "레오나르도 다빈치는 갑옷을 입고 팔과 턱 등을 움직일 수 있는 기계 기사를 설계했습니다.",
+        image: "davinci",
+        imageAlt: "레오나르도 다빈치의 기계 기사 설계",
+        imageCaption: "레오나르도 다빈치가 구상한 기계 기사"
       },
       {
         kind: "choice",
         question:
           "1939년 뉴욕 세계박람회에 등장한 초기 인간형 로봇은 무엇일까요?",
-        options: [
-          "아시모",
-          "일렉트로",
-          "스팟",
-          "와봇-1"
-        ],
+        options: ["아시모", "일렉트로", "스팟", "와봇-1"],
         answer: 1,
         explanation:
-          "일렉트로(Elektro)는 초기 인간형 로봇으로 유명합니다."
+          "일렉트로는 사람 모양을 하고 걷거나 말하고 팔을 움직였던 초기 인간형 로봇입니다.",
+        image: "elektro",
+        imageAlt: "초기 인간형 로봇 일렉트로",
+        imageCaption: "1939년 뉴욕 세계박람회에 등장한 일렉트로"
       },
       {
         kind: "choice",
-  question: "2026년 CES에서 'Best Robot'으로 선정된 로봇은 무엇일까요?",
-  options: [
-    "아시모",
-    "옵티머스",
-    "스팟",
-    "아틀라스"
-  ],
-  answer: 3,
-  explanation: "보스턴 다이내믹스의 휴머노이드 로봇 아틀라스(Atlas)는 2026년 CES에서 CNET Group이 선정한 'Best Robot'을 수상했습니다."
+        question:
+          "2026년 CES에서 'Best Robot'으로 선정된 로봇은 무엇일까요?",
+        options: ["아시모", "옵티머스", "스팟", "아틀라스"],
+        answer: 3,
+        explanation:
+          "보스턴 다이내믹스의 휴머노이드 로봇 아틀라스가 2026년 CES에서 CNET Group이 선정한 'Best Robot'으로 뽑혔습니다.",
+        image: "atlas",
+        imageAlt:
+          "보스턴 다이내믹스의 휴머노이드 로봇 아틀라스",
+        imageCaption:
+          "보스턴 다이내믹스의 전동식 휴머노이드 로봇 아틀라스"
       }
     ]
   },
@@ -128,14 +140,13 @@ export const parts = [
         question: "자동문은 로봇이다.",
         answer: false,
         explanation:
-          "자동문은 센서를 사용하지만 자동기계로 분류합니다."
+          "자동문은 센서를 사용하지만 일반적으로 자동기계로 분류합니다."
       },
       {
         kind: "ox",
         question: "엘리베이터는 로봇이다.",
         answer: false,
-        explanation:
-          "엘리베이터는 자동제어 기계입니다."
+        explanation: "엘리베이터는 자동제어 기계입니다."
       },
       {
         kind: "ox",
