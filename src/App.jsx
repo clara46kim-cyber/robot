@@ -404,3 +404,4 @@ function ImaginePart({ part, saved, save, goHome }) {
     </main>
   )
 }
+export default App;
