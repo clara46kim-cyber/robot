@@ -305,3 +305,27 @@ button:focus-visible, input:focus-visible, textarea:focus-visible { outline: 4px
   }
   .exact-copy span { font-size: 13px; }
 }
+.explanation-image {
+  width: 100%;
+  max-width: 520px;
+  margin: 18px auto;
+  padding: 12px;
+  background: #ffffff;
+  border-radius: 18px;
+  box-sizing: border-box;
+}
+
+.explanation-image img {
+  display: block;
+  width: 100%;
+  max-height: 320px;
+  object-fit: contain;
+  border-radius: 12px;
+}
+
+.explanation-image figcaption {
+  margin-top: 10px;
+  text-align: center;
+  font-size: 14px;
+  color: #555;
+}
