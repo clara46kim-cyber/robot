@@ -100,17 +100,15 @@ export const parts = [
       },
       {
         kind: "choice",
-        question:
-          "2026년 CES에서 올해의 로봇상을 수상한 로봇은 무엇일까요?",
-        options: [
-          "아시모",
-          "옵티머스",
-          "스팟",
-          "아틀라스"
-        ],
-        answer: 1,
-        explanation:
-          "옵티머스(Optimus)는 테슬라의 휴머노이드 로봇으로 2026년 CES에서 큰 주목을 받았습니다."
+  question: "2026년 CES에서 'Best Robot'으로 선정된 로봇은 무엇일까요?",
+  options: [
+    "아시모",
+    "옵티머스",
+    "스팟",
+    "아틀라스"
+  ],
+  answer: 3,
+  explanation: "보스턴 다이내믹스의 휴머노이드 로봇 아틀라스(Atlas)는 2026년 CES에서 CNET Group이 선정한 'Best Robot'을 수상했습니다."
       }
     ]
   },
