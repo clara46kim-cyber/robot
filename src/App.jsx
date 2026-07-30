@@ -121,195 +121,14 @@ function Header({ part, goHome }) {
   )
 }
 
-function QuizPart({ part, saved, save, goHome }) {
-  const [index, setIndex] = useState(saved?.index || 0)
-  const [answers, setAnswers] = useState(saved?.answers || {})
-
-  const question = part.questions[index]
-  const current = answers[index]
-
-  const choose = value => {
-    if (current) return
-
-    setAnswers(prev => ({
-      ...prev,
-      [index]: {
-        value,
-        correct: value === question.answer
-      }
-    }))
-  }
-
-  const next = () => {
-    const latest = { ...answers }
-
-    if (index === part.questions.length - 1) {
-      save({
-        index,
-        answers: latest,
-        complete: true
-      })
-
-      goHome()
-    } else {
-      const nextIndex = index + 1
-
-      save({
-        index: nextIndex,
-        answers: latest,
-        complete: false
-      })
-
-      setIndex(nextIndex)
-
-      window.scrollTo({
-        top: 0,
-        behavior: 'smooth'
-      })
-    }
-  }
-
-  return (
-    <main
-      className="part-screen"
-      style={{ '--accent': part.color }}
-    >
-      <Header
-        part={part}
-        goHome={goHome}
-      />
-
-      <section className="guide-card">
-        <img
-          src={images[part.image]}
-          alt={part.character}
-        />
-
-        <div className="speech">
-          <b>{part.shortName}의 한마디</b>
-          <p>{part.intro}</p>
-        </div>
-      </section>
-
-      <section className="quiz-card">
-        <div className="quiz-meta">
-          <span>문제 {index + 1}</span>
-          <span>{part.questions.length}문제 중</span>
-        </div>
-
-        <div className="mini-progress">
-          <div
-            style={{
-              width: `${((index + 1) / part.questions.length) * 100}%`
-            }}
-          />
-        </div>
-
-        <h2>{question.question}</h2>
-
-        {question.kind === 'choice' ? (
-          <div className="choice-list">
-            {question.options.map((option, i) => (
-              <button
-                key={option}
-                className={current?.value === i ? 'selected' : ''}
-                disabled={Boolean(current)}
-                onClick={() => choose(i)}
-              >
-                <span>{i + 1}</span>
-                {option}
-              </button>
-            ))}
-          </div>
-        ) : (
-          <div className="ox-buttons">
-            <button
-              className={current?.value === true ? 'selected' : ''}
-              disabled={Boolean(current)}
-              onClick={() => choose(true)}
-            >
-              O
-            </button>
-
-            <button
-              className={current?.value === false ? 'selected' : ''}
-              disabled={Boolean(current)}
-              onClick={() => choose(false)}
-            >
-              X
-            </button>
-          </div>
-        )}
-
-        {current && (
-          <div
-            className={`feedback ${
-              current.correct ? 'correct' : 'wrong'
-            }`}
-          >
-            <div className="feedback-heading">
-              {current.correct ? <CheckCircle2 /> : <XCircle />}
-
-              <b>
-                {current.correct
-                  ? '정답이에요!'
-                  : '아쉬워요. 정답을 확인해 보세요!'}
-              </b>
-            </div>
-
-            {!current.correct && (
-              <p>
-                <b>정답:</b>{' '}
-                {question.kind === 'choice'
-                  ? `${question.answer + 1}번 ${
-                      question.options[question.answer]
-                    }`
-                  : question.answer
-                    ? 'O'
-                    : 'X'}
-              </p>
-            )}
-
-            <p>
-              <b>설명:</b> {question.explanation}
-            </p>
-
-            {question.image &&
-              explanationImages[question.image] && (
-                <figure className="explanation-image">
-                  <img
-                    src={explanationImages[question.image]}
-                    alt={question.imageAlt || '문제 관련 이미지'}
-                  />
-
-                  {question.imageCaption && (
-                    <figcaption>
-                      {question.imageCaption}
-                    </figcaption>
-                  )}
-                </figure>
-              )}
-
-            <button
-              className="primary-button"
-              onClick={next}
-            >
-              {index === part.questions.length - 1
-                ? '이 파트 마치기'
-                : '다음 문제'}
-
-              <ChevronRight />
-            </button>
-          </div>
-        )}
-      </section>
-    </main>
-  )
-}
-
 function ImaginePart({ part, saved, save, goHome }) {
   const [form, setForm] = useState(saved?.form || {})
+  const [generatedImage, setGeneratedImage] = useState(
+    saved?.image || ''
+  )
   const [done, setDone] = useState(Boolean(saved?.complete))
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
 
   const ready = part.prompts.every(item =>
     (form[item.key] || '').trim()
@@ -320,6 +139,66 @@ function ImaginePart({ part, saved, save, goHome }) {
       ...prev,
       [key]: value
     }))
+
+    setError('')
+  }
+
+  const generateRobotImage = async () => {
+    if (!ready || loading) return
+
+    setLoading(true)
+    setError('')
+
+    try {
+      const response = await fetch('/api/generate-image', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          name: form.name,
+          place: form.place,
+          problem: form.problem,
+          job: form.job,
+          feature: form.feature
+        })
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(
+          data.error || '이미지 생성에 실패했습니다.'
+        )
+      }
+
+      if (!data.image) {
+        throw new Error('생성된 이미지가 없습니다.')
+      }
+
+      setGeneratedImage(data.image)
+      setDone(true)
+
+      save({
+        form,
+        image: data.image,
+        complete: true
+      })
+
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+      })
+    } catch (err) {
+      console.error(err)
+
+      setError(
+        err.message ||
+          '이미지를 만드는 중 오류가 발생했습니다.'
+      )
+    } finally {
+      setLoading(false)
+    }
   }
 
   if (done) {
@@ -335,6 +214,7 @@ function ImaginePart({ part, saved, save, goHome }) {
 
         <section className="certificate">
           <img
+            className="certificate-character"
             src={images[part.image]}
             alt={part.character}
           />
@@ -343,6 +223,19 @@ function ImaginePart({ part, saved, save, goHome }) {
 
           <h1>나의 미래 로봇</h1>
           <h2>{form.name}</h2>
+
+          {generatedImage && (
+            <figure className="generated-robot">
+              <img
+                src={generatedImage}
+                alt={`${form.name} 미래 로봇`}
+              />
+
+              <figcaption>
+                내가 상상한 내용을 AI가 이미지로 표현했어요.
+              </figcaption>
+            </figure>
+          )}
 
           <div className="idea-summary">
             <p>
@@ -366,9 +259,34 @@ function ImaginePart({ part, saved, save, goHome }) {
             </p>
           </div>
 
+          {error && (
+            <div className="image-error">
+              {error}
+            </div>
+          )}
+
           <button
             className="primary-button"
+            onClick={generateRobotImage}
+            disabled={loading}
+          >
+            {loading ? (
+              <>
+                <span className="loading-spinner" />
+                새로운 로봇을 만드는 중...
+              </>
+            ) : (
+              <>
+                <RotateCcw />
+                이미지 다시 만들기
+              </>
+            )}
+          </button>
+
+          <button
+            className="secondary-button"
             onClick={goHome}
+            disabled={loading}
           >
             <Home />
             홈으로
@@ -405,6 +323,7 @@ function ImaginePart({ part, saved, save, goHome }) {
 
         <p className="helper">
           정답은 없습니다. 떠오르는 생각을 자유롭게 적어 보세요.
+          모든 내용을 입력하면 AI가 로봇의 모습을 만들어 줍니다.
         </p>
 
         <div className="form-list">
@@ -418,97 +337,70 @@ function ImaginePart({ part, saved, save, goHome }) {
               {prompt.key === 'job' ? (
                 <textarea
                   value={form[prompt.key] || ''}
-                  onChange={e =>
-                    update(prompt.key, e.target.value)
+                  onChange={event =>
+                    update(
+                      prompt.key,
+                      event.target.value
+                    )
                   }
                   placeholder={prompt.placeholder}
+                  disabled={loading}
                 />
               ) : (
                 <input
                   value={form[prompt.key] || ''}
-                  onChange={e =>
-                    update(prompt.key, e.target.value)
+                  onChange={event =>
+                    update(
+                      prompt.key,
+                      event.target.value
+                    )
                   }
                   placeholder={prompt.placeholder}
+                  disabled={loading}
                 />
               )}
             </label>
           ))}
         </div>
 
+        {error && (
+          <div className="image-error">
+            {error}
+          </div>
+        )}
+
+        {loading && (
+          <div className="generating-message">
+            <span className="loading-spinner" />
+
+            <div>
+              <b>상상의 로봇을 만들고 있어요!</b>
+              <p>
+                약간의 시간이 걸릴 수 있습니다.
+                창을 닫지 말고 기다려 주세요.
+              </p>
+            </div>
+          </div>
+        )}
+
         <button
           className="primary-button"
-          disabled={!ready}
-          onClick={() => {
-            save({
-              form,
-              complete: true
-            })
-
-            setDone(true)
-
-            window.scrollTo({
-              top: 0,
-              behavior: 'smooth'
-            })
-          }}
+          disabled={!ready || loading}
+          onClick={generateRobotImage}
         >
-          나의 로봇 완성하기
-          <Sparkles />
+          {loading ? (
+            <>
+              <span className="loading-spinner" />
+              AI가 로봇을 만드는 중...
+            </>
+          ) : (
+            <>
+              상상의 로봇 이미지 만들기
+              <Sparkles />
+            </>
+          )}
         </button>
       </section>
     </main>
-  )
-}
-
-export default function App() {
-  const [currentId, setCurrentId] = useState(null)
-  const [progress, setProgress] = useState({})
-
-  const currentPart = parts.find(
-    part => part.id === currentId
-  )
-
-  const save = (id, data) => {
-    setProgress(prev => ({
-      ...prev,
-      [id]: data
-    }))
-  }
-
-  const completed = Object.fromEntries(
-    Object.entries(progress)
-      .filter(([, value]) => value?.complete)
-      .map(([key]) => [key, true])
-  )
-
-  if (!currentPart) {
-    return (
-      <HomeScreen
-        completed={completed}
-        openPart={setCurrentId}
-        resetAll={() => setProgress({})}
-      />
-    )
-  }
-
-  if (currentPart.type === 'imagine') {
-    return (
-      <ImaginePart
-        part={currentPart}
-        saved={progress[currentId]}
-        save={data => save(currentId, data)}
-        goHome={() => setCurrentId(null)}
-      />
-    )
-  }
-
-  return (
-    <QuizPart
-      part={currentPart}
-      saved={progress[currentId]}
-      save={data => save(currentId, data)}
-      goHome={() => setCurrentId(null)}
-    />
   )
 }
