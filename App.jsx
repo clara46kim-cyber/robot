@@ -37,16 +37,53 @@ const explanationImages = {
 
 const STORAGE_KEY = 'robopark-worksheet-progress'
 
+const EMPTY_ROBOT_FORM = {
+  name: '',
+  place: '',
+  problem: '',
+  job: '',
+  feature: ''
+}
+
 function loadProgress() {
   try {
     const saved = localStorage.getItem(STORAGE_KEY)
-    return saved ? JSON.parse(saved) : {}
-  } catch {
+
+    if (!saved) {
+      return {}
+    }
+
+    const parsed = JSON.parse(saved)
+
+    /*
+      티나의 상상 로봇 활동은 이전 입력값과 이미지를
+      새로 접속했을 때 불러오지 않도록 제거합니다.
+    */
+    Object.keys(parsed).forEach(partId => {
+      const part = parts.find(item => item.id === partId)
+
+      if (part?.prompts) {
+        delete parsed[partId]
+      }
+    })
+
+    localStorage.setItem(
+      STORAGE_KEY,
+      JSON.stringify(parsed)
+    )
+
+    return parsed
+  } catch (error) {
+    console.error('저장 기록을 불러오지 못했습니다.', error)
     return {}
   }
 }
 
-function HomeScreen({ completed, openPart, resetAll }) {
+function HomeScreen({
+  completed,
+  openPart,
+  resetAll
+}) {
   return (
     <main className="home-screen">
       <section className="home-hero">
@@ -62,7 +99,8 @@ function HomeScreen({ completed, openPart, resetAll }) {
         </h1>
 
         <p>
-          로보파크의 네 캐릭터와 함께 네 가지 활동을 차례로 만나 보세요.
+          로보파크의 네 캐릭터와 함께 네 가지 활동을
+          차례로 만나 보세요.
         </p>
       </section>
 
@@ -74,7 +112,9 @@ function HomeScreen({ completed, openPart, resetAll }) {
             style={{ '--accent': part.color }}
             onClick={() => openPart(part.id)}
           >
-            <div className="number-badge">{index + 1}</div>
+            <div className="number-badge">
+              {index + 1}
+            </div>
 
             <img
               src={images[part.image]}
@@ -83,10 +123,14 @@ function HomeScreen({ completed, openPart, resetAll }) {
 
             <div className="exact-copy">
               <small>{part.character}</small>
+
               <h2>{part.menuTitle}</h2>
 
               <span>
-                {completed[part.id] ? '완료 ✓' : '시작하기'}
+                {completed[part.id]
+                  ? '완료 ✓'
+                  : '시작하기'}
+
                 <ChevronRight size={18} />
               </span>
             </div>
@@ -132,19 +176,35 @@ function Header({ part, goHome }) {
   )
 }
 
-function QuizPart({ part, saved, save, goHome }) {
+function QuizPart({
+  part,
+  saved,
+  save,
+  goHome
+}) {
   const questions = part.questions || []
-  const [current, setCurrent] = useState(saved?.current || 0)
-  const [answers, setAnswers] = useState(saved?.answers || {})
+
+  const [current, setCurrent] = useState(
+    saved?.current || 0
+  )
+
+  const [answers, setAnswers] = useState(
+    saved?.answers || {}
+  )
+
   const [showResult, setShowResult] = useState(
     Boolean(saved?.showResult)
   )
 
   const question = questions[current]
   const selected = answers[current]
-  const isAnswered = selected !== undefined
+
+  const isAnswered =
+    selected !== undefined
+
   const isCorrect =
-    isAnswered && selected === question?.answer
+    isAnswered &&
+    selected === question?.answer
 
   const chooseAnswer = index => {
     if (isAnswered) return
@@ -169,6 +229,7 @@ function QuizPart({ part, saved, save, goHome }) {
 
     if (current < questions.length - 1) {
       const nextCurrent = current + 1
+
       setCurrent(nextCurrent)
 
       save({
@@ -213,10 +274,16 @@ function QuizPart({ part, saved, save, goHome }) {
         className="part-screen"
         style={{ '--accent': part.color }}
       >
-        <Header part={part} goHome={goHome} />
+        <Header
+          part={part}
+          goHome={goHome}
+        />
 
         <section className="quiz-card">
-          <h2>문제가 아직 준비되지 않았어요.</h2>
+          <h2>
+            문제가 아직 준비되지 않았어요.
+          </h2>
+
           <button
             className="primary-button"
             onClick={goHome}
@@ -232,7 +299,8 @@ function QuizPart({ part, saved, save, goHome }) {
   if (showResult) {
     const correctCount = questions.reduce(
       (count, item, index) =>
-        count + (answers[index] === item.answer ? 1 : 0),
+        count +
+        (answers[index] === item.answer ? 1 : 0),
       0
     )
 
@@ -241,7 +309,10 @@ function QuizPart({ part, saved, save, goHome }) {
         className="part-screen"
         style={{ '--accent': part.color }}
       >
-        <Header part={part} goHome={goHome} />
+        <Header
+          part={part}
+          goHome={goHome}
+        />
 
         <section className="certificate">
           <img
@@ -251,10 +322,14 @@ function QuizPart({ part, saved, save, goHome }) {
           />
 
           <span>MISSION COMPLETE</span>
-          <h1>{part.menuTitle} 완료!</h1>
+
+          <h1>
+            {part.menuTitle} 완료!
+          </h1>
 
           <h2>
-            {questions.length}문제 중 {correctCount}문제를 맞혔어요.
+            {questions.length}문제 중{' '}
+            {correctCount}문제를 맞혔어요.
           </h2>
 
           <button
@@ -282,7 +357,10 @@ function QuizPart({ part, saved, save, goHome }) {
       className="part-screen"
       style={{ '--accent': part.color }}
     >
-      <Header part={part} goHome={goHome} />
+      <Header
+        part={part}
+        goHome={goHome}
+      />
 
       <section className="guide-card">
         <img
@@ -291,7 +369,10 @@ function QuizPart({ part, saved, save, goHome }) {
         />
 
         <div className="speech">
-          <b>{part.character}의 미션</b>
+          <b>
+            {part.character}의 미션
+          </b>
+
           <p>{part.intro}</p>
         </div>
       </section>
@@ -310,35 +391,46 @@ function QuizPart({ part, saved, save, goHome }) {
         )}
 
         <div className="answer-list">
-          {question.options.map((option, index) => {
-            let className = 'answer-button'
+          {question.options.map(
+            (option, index) => {
+              let className =
+                'answer-button'
 
-            if (isAnswered) {
-              if (index === question.answer) {
-                className += ' correct'
-              } else if (index === selected) {
-                className += ' wrong'
+              if (isAnswered) {
+                if (
+                  index === question.answer
+                ) {
+                  className += ' correct'
+                } else if (
+                  index === selected
+                ) {
+                  className += ' wrong'
+                }
               }
-            }
 
-            return (
-              <button
-                key={`${option}-${index}`}
-                className={className}
-                onClick={() => chooseAnswer(index)}
-                disabled={isAnswered}
-              >
-                <span>{index + 1}</span>
-                {option}
-              </button>
-            )
-          })}
+              return (
+                <button
+                  key={`${option}-${index}`}
+                  className={className}
+                  onClick={() =>
+                    chooseAnswer(index)
+                  }
+                  disabled={isAnswered}
+                >
+                  <span>{index + 1}</span>
+                  {option}
+                </button>
+              )
+            }
+          )}
         </div>
 
         {isAnswered && (
           <section
             className={`answer-result ${
-              isCorrect ? 'correct' : 'wrong'
+              isCorrect
+                ? 'correct'
+                : 'wrong'
             }`}
           >
             <div className="result-title">
@@ -357,18 +449,29 @@ function QuizPart({ part, saved, save, goHome }) {
 
             <p>
               <b>정답:</b>{' '}
-              {question.options[question.answer]}
+              {
+                question.options[
+                  question.answer
+                ]
+              }
             </p>
 
             <p>
-              <b>설명:</b> {question.explanation}
+              <b>설명:</b>{' '}
+              {question.explanation}
             </p>
 
             {question.image &&
-              explanationImages[question.image] && (
+              explanationImages[
+                question.image
+              ] && (
                 <figure className="explanation-image">
                   <img
-                    src={explanationImages[question.image]}
+                    src={
+                      explanationImages[
+                        question.image
+                      ]
+                    }
                     alt={
                       question.imageAlt ||
                       '문제 관련 이미지'
@@ -377,7 +480,9 @@ function QuizPart({ part, saved, save, goHome }) {
 
                   {question.imageCaption && (
                     <figcaption>
-                      {question.imageCaption}
+                      {
+                        question.imageCaption
+                      }
                     </figcaption>
                   )}
                 </figure>
@@ -390,9 +495,11 @@ function QuizPart({ part, saved, save, goHome }) {
           disabled={!isAnswered}
           onClick={nextQuestion}
         >
-          {current < questions.length - 1
+          {current <
+          questions.length - 1
             ? '다음 문제'
             : '결과 보기'}
+
           <ChevronRight />
         </button>
       </section>
@@ -400,13 +507,25 @@ function QuizPart({ part, saved, save, goHome }) {
   )
 }
 
-function ImaginePart({ part, saved, save, goHome }) {
-  const [form, setForm] = useState(saved?.form || {})
-  const [generatedImage, setGeneratedImage] = useState(
-    saved?.image || ''
+function ImaginePart({
+  part,
+  goHome
+}) {
+  /*
+    티나 활동은 saved 데이터를 사용하지 않습니다.
+    페이지를 다시 열 때 항상 빈 입력칸으로 시작합니다.
+  */
+  const [form, setForm] = useState(
+    EMPTY_ROBOT_FORM
   )
-  const [done, setDone] = useState(Boolean(saved?.complete))
-  const [loading, setLoading] = useState(false)
+
+  const [generatedImage, setGeneratedImage] =
+    useState('')
+
+  const [done, setDone] = useState(false)
+  const [loading, setLoading] =
+    useState(false)
+
   const [error, setError] = useState('')
 
   const ready = part.prompts.every(item =>
@@ -414,8 +533,8 @@ function ImaginePart({ part, saved, save, goHome }) {
   )
 
   const update = (key, value) => {
-    setForm(prev => ({
-      ...prev,
+    setForm(previous => ({
+      ...previous,
       [key]: value
     }))
 
@@ -429,63 +548,82 @@ function ImaginePart({ part, saved, save, goHome }) {
     setError('')
 
     try {
-      const response = await fetch('/api/generate-image', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          name: form.name,
-          place: form.place,
-          problem: form.problem,
-          job: form.job,
-          feature: form.feature
-        })
-      })
+      const response = await fetch(
+        '/api/generate-image',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type':
+              'application/json'
+          },
+          body: JSON.stringify(form)
+        }
+      )
 
       const contentType =
-        response.headers.get('content-type') || ''
+        response.headers.get(
+          'content-type'
+        ) || ''
 
-      const data = contentType.includes('application/json')
-        ? await response.json()
-        : {
-            error:
-              '서버에서 올바른 응답을 받지 못했습니다.'
-          }
+      const data =
+        contentType.includes(
+          'application/json'
+        )
+          ? await response.json()
+          : {
+              error:
+                '서버에서 올바른 응답을 받지 못했습니다.'
+            }
 
       if (!response.ok) {
         throw new Error(
-          data.error || '이미지 생성에 실패했습니다.'
+          data.error ||
+            '이미지 생성에 실패했습니다.'
         )
       }
 
-      if (!data.image) {
-        throw new Error('생성된 이미지가 없습니다.')
+      if (
+        !data.image ||
+        typeof data.image !== 'string' ||
+        !data.image.startsWith(
+          'data:image/'
+        )
+      ) {
+        throw new Error(
+          '정상적인 이미지 데이터를 받지 못했습니다.'
+        )
       }
 
       setGeneratedImage(data.image)
       setDone(true)
 
-      save({
-        form,
-        image: data.image,
-        complete: true
-      })
-
       window.scrollTo({
         top: 0,
         behavior: 'smooth'
       })
-    } catch (err) {
-      console.error(err)
+    } catch (error) {
+      console.error(error)
 
       setError(
-        err.message ||
-          '이미지를 만드는 중 오류가 발생했습니다.'
+        error instanceof Error
+          ? error.message
+          : '이미지를 만드는 중 오류가 발생했습니다.'
       )
     } finally {
       setLoading(false)
     }
+  }
+
+  const resetRobot = () => {
+    setForm(EMPTY_ROBOT_FORM)
+    setGeneratedImage('')
+    setDone(false)
+    setError('')
+
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    })
   }
 
   if (done) {
@@ -494,7 +632,10 @@ function ImaginePart({ part, saved, save, goHome }) {
         className="part-screen"
         style={{ '--accent': part.color }}
       >
-        <Header part={part} goHome={goHome} />
+        <Header
+          part={part}
+          goHome={goHome}
+        />
 
         <section className="certificate">
           <img
@@ -513,10 +654,17 @@ function ImaginePart({ part, saved, save, goHome }) {
               <img
                 src={generatedImage}
                 alt={`${form.name} 미래 로봇`}
+                onError={() => {
+                  setGeneratedImage('')
+                  setError(
+                    '생성된 이미지를 표시하지 못했습니다. 다시 만들어 주세요.'
+                  )
+                }}
               />
 
               <figcaption>
-                내가 상상한 내용을 AI가 이미지로 표현했어요.
+                내가 상상한 내용을 AI가
+                이미지로 표현했어요.
               </figcaption>
             </figure>
           )}
@@ -544,7 +692,9 @@ function ImaginePart({ part, saved, save, goHome }) {
           </div>
 
           {error && (
-            <div className="image-error">{error}</div>
+            <div className="image-error">
+              {error}
+            </div>
           )}
 
           <button
@@ -560,9 +710,18 @@ function ImaginePart({ part, saved, save, goHome }) {
             ) : (
               <>
                 <RotateCcw />
-                이미지 다시 만들기
+                같은 내용으로 다시 만들기
               </>
             )}
+          </button>
+
+          <button
+            className="secondary-button"
+            onClick={resetRobot}
+            disabled={loading}
+          >
+            <RotateCcw />
+            새로운 내용 입력하기
           </button>
 
           <button
@@ -583,7 +742,10 @@ function ImaginePart({ part, saved, save, goHome }) {
       className="part-screen"
       style={{ '--accent': part.color }}
     >
-      <Header part={part} goHome={goHome} />
+      <Header
+        part={part}
+        goHome={goHome}
+      />
 
       <section className="guide-card">
         <img
@@ -598,46 +760,68 @@ function ImaginePart({ part, saved, save, goHome }) {
       </section>
 
       <section className="quiz-card imagination-card">
-        <h2>내가 만들고 싶은 미래 로봇</h2>
+        <h2>
+          내가 만들고 싶은 미래 로봇
+        </h2>
 
         <p className="helper">
-          정답은 없습니다. 떠오르는 생각을 자유롭게 적어 보세요.
-          모든 내용을 입력하면 AI가 로봇의 모습을 만들어 줍니다.
+          정답은 없습니다. 떠오르는 생각을
+          자유롭게 적어 보세요. 모든 내용을
+          입력하면 AI가 로봇의 모습을 만들어
+          줍니다.
         </p>
 
         <div className="form-list">
-          {part.prompts.map((prompt, i) => (
-            <label key={prompt.key}>
-              <span>
-                <b>{i + 1}</b>
-                {prompt.label}
-              </span>
+          {part.prompts.map(
+            (prompt, index) => (
+              <label key={prompt.key}>
+                <span>
+                  <b>{index + 1}</b>
+                  {prompt.label}
+                </span>
 
-              {prompt.key === 'job' ? (
-                <textarea
-                  value={form[prompt.key] || ''}
-                  onChange={event =>
-                    update(prompt.key, event.target.value)
-                  }
-                  placeholder={prompt.placeholder}
-                  disabled={loading}
-                />
-              ) : (
-                <input
-                  value={form[prompt.key] || ''}
-                  onChange={event =>
-                    update(prompt.key, event.target.value)
-                  }
-                  placeholder={prompt.placeholder}
-                  disabled={loading}
-                />
-              )}
-            </label>
-          ))}
+                {prompt.key === 'job' ? (
+                  <textarea
+                    value={
+                      form[prompt.key] || ''
+                    }
+                    onChange={event =>
+                      update(
+                        prompt.key,
+                        event.target.value
+                      )
+                    }
+                    placeholder={
+                      prompt.placeholder
+                    }
+                    disabled={loading}
+                  />
+                ) : (
+                  <input
+                    value={
+                      form[prompt.key] || ''
+                    }
+                    onChange={event =>
+                      update(
+                        prompt.key,
+                        event.target.value
+                      )
+                    }
+                    placeholder={
+                      prompt.placeholder
+                    }
+                    disabled={loading}
+                  />
+                )}
+              </label>
+            )
+          )}
         </div>
 
         {error && (
-          <div className="image-error">{error}</div>
+          <div className="image-error">
+            {error}
+          </div>
         )}
 
         {loading && (
@@ -645,10 +829,14 @@ function ImaginePart({ part, saved, save, goHome }) {
             <span className="loading-spinner" />
 
             <div>
-              <b>상상의 로봇을 만들고 있어요!</b>
+              <b>
+                상상의 로봇을 만들고 있어요!
+              </b>
+
               <p>
-                약간의 시간이 걸릴 수 있습니다.
-                창을 닫지 말고 기다려 주세요.
+                약간의 시간이 걸릴 수
+                있습니다. 창을 닫지 말고
+                기다려 주세요.
               </p>
             </div>
           </div>
@@ -677,14 +865,29 @@ function ImaginePart({ part, saved, save, goHome }) {
 }
 
 function App() {
-  const [progress, setProgress] = useState(loadProgress)
-  const [activePartId, setActivePartId] = useState(null)
+  const [progress, setProgress] =
+    useState(loadProgress)
+
+  const [activePartId, setActivePartId] =
+    useState(null)
 
   const activePart = parts.find(
     part => part.id === activePartId
   )
 
   const savePart = (partId, value) => {
+    const targetPart = parts.find(
+      part => part.id === partId
+    )
+
+    /*
+      티나 활동은 저장하지 않습니다.
+      퀴즈 활동만 브라우저에 저장합니다.
+    */
+    if (targetPart?.prompts) {
+      return
+    }
+
     setProgress(previous => {
       const next = {
         ...previous,
@@ -714,7 +917,9 @@ function App() {
 
   const completed = Object.fromEntries(
     Object.entries(progress)
-      .filter(([, value]) => value?.complete)
+      .filter(
+        ([, value]) => value?.complete
+      )
       .map(([key]) => [key, true])
   )
 
@@ -731,15 +936,25 @@ function App() {
   const commonProps = {
     part: activePart,
     saved: progress[activePart.id],
-    save: value => savePart(activePart.id, value),
+    save: value =>
+      savePart(activePart.id, value),
     goHome: () => setActivePartId(null)
   }
 
   if (activePart.prompts) {
-    return <ImaginePart {...commonProps} />
+    return (
+      <ImaginePart
+        part={activePart}
+        goHome={() =>
+          setActivePartId(null)
+        }
+      />
+    )
   }
 
-  return <QuizPart {...commonProps} />
+  return (
+    <QuizPart {...commonProps} />
+  )
 }
 
 export default App
