@@ -35,6 +35,17 @@ const explanationImages = {
   atlas
 }
 
+const STORAGE_KEY = 'robopark-worksheet-progress'
+
+function loadProgress() {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY)
+    return saved ? JSON.parse(saved) : {}
+  } catch {
+    return {}
+  }
+}
+
 function HomeScreen({ completed, openPart, resetAll }) {
   return (
     <main className="home-screen">
@@ -121,6 +132,282 @@ function Header({ part, goHome }) {
   )
 }
 
+function QuizPart({ part, saved, save, goHome }) {
+  const questions = part.questions || []
+  const [current, setCurrent] = useState(saved?.current || 0)
+  const [answers, setAnswers] = useState(saved?.answers || {})
+  const [showResult, setShowResult] = useState(
+    Boolean(saved?.showResult)
+  )
+
+  const rawQuestion = questions[current]
+  const question = rawQuestion?.kind === 'ox'
+    ? {
+        ...rawQuestion,
+        options: ['O', 'X'],
+        answer: rawQuestion.answer ? 0 : 1
+      }
+    : rawQuestion
+
+  const selected = answers[current]
+  const isAnswered = selected !== undefined
+  const isCorrect =
+    isAnswered && selected === question?.answer
+
+  const chooseAnswer = index => {
+    if (isAnswered) return
+
+    const nextAnswers = {
+      ...answers,
+      [current]: index
+    }
+
+    setAnswers(nextAnswers)
+
+    save({
+      current,
+      answers: nextAnswers,
+      showResult: false,
+      complete: false
+    })
+  }
+
+  const nextQuestion = () => {
+    if (!isAnswered) return
+
+    if (current < questions.length - 1) {
+      const nextCurrent = current + 1
+      setCurrent(nextCurrent)
+
+      save({
+        current: nextCurrent,
+        answers,
+        showResult: false,
+        complete: false
+      })
+    } else {
+      setShowResult(true)
+
+      save({
+        current,
+        answers,
+        showResult: true,
+        complete: true
+      })
+
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+      })
+    }
+  }
+
+  const retry = () => {
+    setCurrent(0)
+    setAnswers({})
+    setShowResult(false)
+
+    save({
+      current: 0,
+      answers: {},
+      showResult: false,
+      complete: false
+    })
+  }
+
+  if (!questions.length) {
+    return (
+      <main
+        className="part-screen"
+        style={{ '--accent': part.color }}
+      >
+        <Header part={part} goHome={goHome} />
+
+        <section className="quiz-card">
+          <h2>문제가 아직 준비되지 않았어요.</h2>
+          <button
+            className="primary-button"
+            onClick={goHome}
+          >
+            <Home />
+            홈으로
+          </button>
+        </section>
+      </main>
+    )
+  }
+
+  if (showResult) {
+    const correctCount = questions.reduce(
+      (count, item, index) =>
+        count + (answers[index] === item.answer ? 1 : 0),
+      0
+    )
+
+    return (
+      <main
+        className="part-screen"
+        style={{ '--accent': part.color }}
+      >
+        <Header part={part} goHome={goHome} />
+
+        <section className="certificate">
+          <img
+            className="certificate-character"
+            src={images[part.image]}
+            alt={part.character}
+          />
+
+          <span>MISSION COMPLETE</span>
+          <h1>{part.menuTitle} 완료!</h1>
+
+          <h2>
+            {questions.length}문제 중 {correctCount}문제를 맞혔어요.
+          </h2>
+
+          <button
+            className="primary-button"
+            onClick={retry}
+          >
+            <RotateCcw />
+            다시 풀기
+          </button>
+
+          <button
+            className="secondary-button"
+            onClick={goHome}
+          >
+            <Home />
+            홈으로
+          </button>
+        </section>
+      </main>
+    )
+  }
+
+  return (
+    <main
+      className="part-screen"
+      style={{ '--accent': part.color }}
+    >
+      <Header part={part} goHome={goHome} />
+
+      <section className="guide-card">
+        <img
+          src={images[part.image]}
+          alt={part.character}
+        />
+
+        <div className="speech">
+          <b>{part.character}의 미션</b>
+          <p>{part.intro}</p>
+        </div>
+      </section>
+
+      <section className="quiz-card">
+        <div className="question-progress">
+          {current + 1} / {questions.length}
+        </div>
+
+        <h2>{question.question}</h2>
+
+        {question.description && (
+          <p className="helper">
+            {question.description}
+          </p>
+        )}
+
+        <div className="answer-list">
+          {question.options.map((option, index) => {
+            let className = 'answer-button'
+
+            if (isAnswered) {
+              if (index === question.answer) {
+                className += ' correct'
+              } else if (index === selected) {
+                className += ' wrong'
+              }
+            }
+
+            return (
+              <button
+                key={`${option}-${index}`}
+                className={className}
+                onClick={() => chooseAnswer(index)}
+                disabled={isAnswered}
+              >
+                <span>{index + 1}</span>
+                {option}
+              </button>
+            )
+          })}
+        </div>
+
+        {isAnswered && (
+          <section
+            className={`answer-result ${
+              isCorrect ? 'correct' : 'wrong'
+            }`}
+          >
+            <div className="result-title">
+              {isCorrect ? (
+                <>
+                  <CheckCircle2 />
+                  정답이에요!
+                </>
+              ) : (
+                <>
+                  <XCircle />
+                  다시 확인해 볼까요?
+                </>
+              )}
+            </div>
+
+            <p>
+              <b>정답:</b>{' '}
+              {question.options[question.answer]}
+            </p>
+
+            <p>
+              <b>설명:</b> {question.explanation}
+            </p>
+
+            {question.image &&
+              explanationImages[question.image] && (
+                <figure className="explanation-image">
+                  <img
+                    src={explanationImages[question.image]}
+                    alt={
+                      question.imageAlt ||
+                      '문제 관련 이미지'
+                    }
+                  />
+
+                  {question.imageCaption && (
+                    <figcaption>
+                      {question.imageCaption}
+                    </figcaption>
+                  )}
+                </figure>
+              )}
+          </section>
+        )}
+
+        <button
+          className="primary-button"
+          disabled={!isAnswered}
+          onClick={nextQuestion}
+        >
+          {current < questions.length - 1
+            ? '다음 문제'
+            : '결과 보기'}
+          <ChevronRight />
+        </button>
+      </section>
+    </main>
+  )
+}
+
 function ImaginePart({ part, saved, save, goHome }) {
   const [form, setForm] = useState(saved?.form || {})
   const [generatedImage, setGeneratedImage] = useState(
@@ -164,7 +451,15 @@ function ImaginePart({ part, saved, save, goHome }) {
         })
       })
 
-      const data = await response.json()
+      const contentType =
+        response.headers.get('content-type') || ''
+
+      const data = contentType.includes('application/json')
+        ? await response.json()
+        : {
+            error:
+              '서버에서 올바른 응답을 받지 못했습니다.'
+          }
 
       if (!response.ok) {
         throw new Error(
@@ -207,10 +502,7 @@ function ImaginePart({ part, saved, save, goHome }) {
         className="part-screen"
         style={{ '--accent': part.color }}
       >
-        <Header
-          part={part}
-          goHome={goHome}
-        />
+        <Header part={part} goHome={goHome} />
 
         <section className="certificate">
           <img
@@ -260,9 +552,7 @@ function ImaginePart({ part, saved, save, goHome }) {
           </div>
 
           {error && (
-            <div className="image-error">
-              {error}
-            </div>
+            <div className="image-error">{error}</div>
           )}
 
           <button
@@ -301,10 +591,7 @@ function ImaginePart({ part, saved, save, goHome }) {
       className="part-screen"
       style={{ '--accent': part.color }}
     >
-      <Header
-        part={part}
-        goHome={goHome}
-      />
+      <Header part={part} goHome={goHome} />
 
       <section className="guide-card">
         <img
@@ -338,10 +625,7 @@ function ImaginePart({ part, saved, save, goHome }) {
                 <textarea
                   value={form[prompt.key] || ''}
                   onChange={event =>
-                    update(
-                      prompt.key,
-                      event.target.value
-                    )
+                    update(prompt.key, event.target.value)
                   }
                   placeholder={prompt.placeholder}
                   disabled={loading}
@@ -350,10 +634,7 @@ function ImaginePart({ part, saved, save, goHome }) {
                 <input
                   value={form[prompt.key] || ''}
                   onChange={event =>
-                    update(
-                      prompt.key,
-                      event.target.value
-                    )
+                    update(prompt.key, event.target.value)
                   }
                   placeholder={prompt.placeholder}
                   disabled={loading}
@@ -364,9 +645,7 @@ function ImaginePart({ part, saved, save, goHome }) {
         </div>
 
         {error && (
-          <div className="image-error">
-            {error}
-          </div>
+          <div className="image-error">{error}</div>
         )}
 
         {loading && (
@@ -404,4 +683,71 @@ function ImaginePart({ part, saved, save, goHome }) {
     </main>
   )
 }
-export default App;
+
+function App() {
+  const [progress, setProgress] = useState(loadProgress)
+  const [activePartId, setActivePartId] = useState(null)
+
+  const activePart = parts.find(
+    part => part.id === activePartId
+  )
+
+  const savePart = (partId, value) => {
+    setProgress(previous => {
+      const next = {
+        ...previous,
+        [partId]: value
+      }
+
+      localStorage.setItem(
+        STORAGE_KEY,
+        JSON.stringify(next)
+      )
+
+      return next
+    })
+  }
+
+  const resetAll = () => {
+    const confirmed = window.confirm(
+      '모든 활동 기록을 지우고 처음부터 시작할까요?'
+    )
+
+    if (!confirmed) return
+
+    localStorage.removeItem(STORAGE_KEY)
+    setProgress({})
+    setActivePartId(null)
+  }
+
+  const completed = Object.fromEntries(
+    Object.entries(progress)
+      .filter(([, value]) => value?.complete)
+      .map(([key]) => [key, true])
+  )
+
+  if (!activePart) {
+    return (
+      <HomeScreen
+        completed={completed}
+        openPart={setActivePartId}
+        resetAll={resetAll}
+      />
+    )
+  }
+
+  const commonProps = {
+    part: activePart,
+    saved: progress[activePart.id],
+    save: value => savePart(activePart.id, value),
+    goHome: () => setActivePartId(null)
+  }
+
+  if (activePart.prompts) {
+    return <ImaginePart {...commonProps} />
+  }
+
+  return <QuizPart {...commonProps} />
+}
+
+export default App
