@@ -1,11 +1,6 @@
-# 로보파크 로봇 탐험대 퀴즈 v5
+# 로보파크 탐험대
 
-첫 화면에 아래 네 파트가 정확히 표시됩니다.
-
-1. 티파(T.Pa): 로봇이란? · 로봇의 구성
-2. 티마(T.Ma): 로봇의 역사
-3. 티피(T.P): 로봇 OX 퀴즈
-4. 티나(T.Na): 로봇과 상상하기
+React + Vite로 만든 어린이 로봇 활동지 웹앱입니다.
 
 ## 실행
 
@@ -14,12 +9,10 @@ npm install
 npm run dev
 ```
 
-## Vercel
+## Vercel 배포
 
-- Framework Preset: Vite
-- Build Command: npm run build
-- Output Directory: dist
-- Install Command: npm install
-- Root Directory: 비워두기
+GitHub 저장소를 Vercel에 연결해 배포하면 됩니다.
 
-기존 저장소 파일을 전부 삭제하고 이 압축파일의 내용으로 교체한 뒤 Commit changes를 누르세요.
+마지막 '상상의 로봇 만들기' 기능은 Pollinations의 공개 이미지 주소를 사용하므로 `POLLINATIONS_API_KEY` 환경변수가 필요하지 않습니다.
+
+> 공개 무료 경로는 서비스 정책과 사용량에 따라 속도 제한이나 일시적인 생성 실패가 발생할 수 있습니다.

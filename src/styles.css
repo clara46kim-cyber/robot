@@ -433,3 +433,89 @@ button:focus-visible, input:focus-visible, textarea:focus-visible { outline: 4px
     transform: rotate(360deg);
   }
 }
+
+/* 퀴즈 선택지 버튼 */
+.answer-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  margin-top: 8px;
+}
+
+.answer-button {
+  width: 100%;
+  min-height: 72px;
+  padding: 14px 18px;
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  border: 2px solid #e3e9df;
+  border-radius: 20px;
+  background: linear-gradient(180deg, #ffffff 0%, #f7faf4 100%);
+  color: #30342e;
+  text-align: left;
+  line-height: 1.45;
+  font-size: 17px;
+  font-weight: 800;
+  box-shadow: 0 7px 18px rgba(47, 70, 37, .08);
+  transition: transform .18s ease, box-shadow .18s ease,
+              border-color .18s ease, background .18s ease;
+}
+
+.answer-button:hover:not(:disabled) {
+  transform: translateY(-3px);
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 8%, white);
+  box-shadow: 0 12px 25px rgba(47, 70, 37, .14);
+}
+
+.answer-button:active:not(:disabled) {
+  transform: translateY(-1px) scale(.99);
+}
+
+.answer-button > span {
+  flex: 0 0 39px;
+  width: 39px;
+  height: 39px;
+  display: grid;
+  place-items: center;
+  border-radius: 13px;
+  background: color-mix(in srgb, var(--accent) 12%, white);
+  color: var(--accent);
+  font-size: 18px;
+  font-weight: 900;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 18%, transparent);
+}
+
+.answer-button.correct {
+  border-color: #37a866;
+  background: #ebfaf1;
+  color: #176239;
+}
+
+.answer-button.correct > span {
+  background: #37a866;
+  color: white;
+}
+
+.answer-button.wrong {
+  border-color: #e96f7c;
+  background: #fff0f2;
+  color: #8a2c3a;
+}
+
+.answer-button.wrong > span {
+  background: #e96f7c;
+  color: white;
+}
+
+.answer-button:disabled {
+  cursor: default;
+  opacity: 1;
+}
+
+@media (max-width: 620px) {
+  .answer-list { grid-template-columns: 1fr; gap: 11px; }
+  .answer-button { min-height: 62px; padding: 12px 14px; font-size: 15px; border-radius: 17px; }
+  .answer-button > span { flex-basis: 35px; width: 35px; height: 35px; border-radius: 11px; }
+}
